@@ -1,12 +1,38 @@
-import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import com.codingfeline.buildkonfig.compiler.FieldSpec
+import java.util.Properties
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("com.codingfeline.buildkonfig:buildkonfig-gradle-plugin:0.15.2")
+    }
+}
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.buildkonfig.plugin)
     kotlin("plugin.serialization") version "2.2.20"
+}
+
+val localProperties = Properties().apply {
+    val file = rootProject.file("local.properties")
+    if (file.exists()) load(file.inputStream())
+}
+
+val tmdbApiKey = localProperties.getProperty("TMDB_API_KEY") ?: ""
+
+buildkonfig {
+    packageName = "com.your.package.name"
+
+    defaultConfigs {
+        buildConfigField(FieldSpec.Type.STRING, "TMDB_API_KEY", tmdbApiKey)
+    }
 }
 
 kotlin {
